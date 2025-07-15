@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "teammates",
+  "version": "${version}",
+  "name": "Teammate Tracker",
+  "description": "",
+  "authors": [
+    "SorkoPiko"
+  ],
+  "contact": {
+    "homepage": "https://sorkopiko.com",
+    "issues": "https://github.com/${github}/issues",
+    "sources": "https://github.com/${github}"
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/teammates/icon.png",
+  "environment": "client",
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}",
+    "yet_another_config_lib_v3": ">=${yacl_version}"
+  }
+}
