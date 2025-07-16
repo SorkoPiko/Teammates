@@ -3,6 +3,7 @@ package com.sorkopiko.teammatestracker.model;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 public record InterpolatedLocation(double x, double y, double z) {
     public static InterpolatedLocation fromTeammate(Teammate teammate, long currentTime) {
@@ -25,7 +26,7 @@ public record InterpolatedLocation(double x, double y, double z) {
         return new InterpolatedLocation(x() + xOffset, y() + yOffset, z() + zOffset);
     }
 
-    public InterpolatedLocation relativeToCamera(Camera camera) {
-        return this.withOffset(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
+    public InterpolatedLocation relativeToCamera(Vec3d camera) {
+        return this.withOffset(-camera.x, -camera.y, -camera.z);
     }
 }

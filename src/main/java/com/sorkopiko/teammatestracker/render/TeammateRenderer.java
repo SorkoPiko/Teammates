@@ -26,7 +26,7 @@ public class TeammateRenderer {
     private static final MinecraftClient client = MinecraftClient.getInstance();
     private static final float ARROW_SIZE = 0.3f;
     private static final int TEXT_OFFSET = 20;
-    private static final float ARROW_OFFSET_Y = 2.15f;
+    private static final float ARROW_OFFSET_Y = 2.f;
 
     public static void render(MatrixStack matrices, Camera camera, Map<UUID, Teammate> teammates, double tickDelta) {
         if (client.player == null || client.world == null || !TeammatesConfig.HANDLER.instance().enabled) return;
@@ -68,12 +68,16 @@ public class TeammateRenderer {
                     return Double.compare(distanceB, distanceA);
                 })
                 .forEach(teammate -> {
-                    InterpolatedLocation location = getLocation(teammate, currentTime, tickDelta)
-                            .withOffset(0, ARROW_OFFSET_Y, 0)
-                            .relativeToCamera(camera);
+                    InterpolatedLocation location = getLocation(teammate, currentTime, tickDelta);
 
                     double distance = calculateDistance(location, cameraPos);
-                    renderTeammateMarker(matrices, location, teammate, distance);
+                    renderTeammateMarker(
+                            matrices,
+                            location.withOffset(0, ARROW_OFFSET_Y + TeammatesConfig.HANDLER.instance().yOffset, 0)
+                                    .relativeToCamera(cameraPos),
+                            teammate,
+                            distance
+                    );
                 });
 
         matrices.pop();
@@ -97,7 +101,7 @@ public class TeammateRenderer {
 
         EntityRenderDispatcher dispatcher = client.getEntityRenderDispatcher();
         matrices.multiply(dispatcher.getRotation());
-        float scale = (float) getScale(distance, TeammatesConfig.HANDLER.instance().markerScale * 0.25f);
+        float scale = (float) getScale(distance, TeammatesConfig.HANDLER.instance().markerScale);
         matrices.scale(scale, scale, scale);
         int backgroundColor = (int)(MinecraftClient.getInstance().options.getTextBackgroundOpacity(0.25F) * 255.0F) << 24 | 0x666666;
 
@@ -158,8 +162,8 @@ public class TeammateRenderer {
 
     private static double getScale(double distance, float scaleFactor) {
         if (distance < 10.f) return scaleFactor;
-//        return scaleFactor * (distance / 10.f);
-        return scaleFactor * (distance - 9.f);
+        return scaleFactor * (distance / 10.f);
+//        return scaleFactor * (distance - 9.f);
     }
 
     private static double calculateDistance(InterpolatedLocation location, Vec3d cameraPos) {

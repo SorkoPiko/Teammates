@@ -20,4 +20,7 @@ public class TeammatesConfig {
 
     @SerialEntry
     public float markerScale = 1.f;
+
+    @SerialEntry
+    public float yOffset = 0.5f;
 }
