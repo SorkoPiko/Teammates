@@ -20,5 +20,12 @@
     "fabric": "*",
     "minecraft": "${minecraft_version}",
     "yet_another_config_lib_v3": ">=${yacl_version}"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/9cGtmS8Sb8"
+      }
+    }
   }
 }
