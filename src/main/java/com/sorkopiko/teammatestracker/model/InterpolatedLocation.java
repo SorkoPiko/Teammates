@@ -1,5 +1,6 @@
 package com.sorkopiko.teammatestracker.model;
 
+import net.minecraft.client.render.Camera;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 
@@ -20,7 +21,11 @@ public record InterpolatedLocation(double x, double y, double z) {
         );
     }
 
-    public InterpolatedLocation withYOffset(double offset) {
-        return new InterpolatedLocation(x(), y() + offset, z());
+    public InterpolatedLocation withOffset(double xOffset, double yOffset, double zOffset) {
+        return new InterpolatedLocation(x() + xOffset, y() + yOffset, z() + zOffset);
+    }
+
+    public InterpolatedLocation relativeToCamera(Camera camera) {
+        return this.withOffset(-camera.getPos().x, -camera.getPos().y, -camera.getPos().z);
     }
 }

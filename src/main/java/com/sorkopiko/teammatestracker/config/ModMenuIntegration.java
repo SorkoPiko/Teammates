@@ -39,7 +39,7 @@ public class ModMenuIntegration implements ModMenuApi {
                                                 scale -> TeammatesConfig.HANDLER.instance().markerScale = scale)
                                         .controller(opt -> FloatSliderControllerBuilder.create(opt)
                                                 .range(0.25f, 4.0f)
-                                                .step(0.1f)
+                                                .step(0.05f)
                                                 .formatValue(val -> Text.literal(String.format("%.1f", val))))
                                         .build())
                                 .build())
