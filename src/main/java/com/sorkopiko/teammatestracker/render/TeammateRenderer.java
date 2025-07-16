@@ -1,7 +1,6 @@
 package com.sorkopiko.teammatestracker.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.sorkopiko.teammatestracker.client.TeammatesTrackerClient;
 import com.sorkopiko.teammatestracker.config.TeammatesConfig;
 import com.sorkopiko.teammatestracker.model.InterpolatedLocation;
 import com.sorkopiko.teammatestracker.model.Teammate;
@@ -12,7 +11,6 @@ import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 import java.awt.*;
@@ -163,7 +161,6 @@ public class TeammateRenderer {
     private static double getScale(double distance, float scaleFactor) {
         if (distance < 10.f) return scaleFactor;
         return scaleFactor * (distance / 10.f);
-//        return scaleFactor * (distance - 9.f);
     }
 
     private static double calculateDistance(InterpolatedLocation location, Vec3d cameraPos) {

@@ -1,6 +1,5 @@
 package com.sorkopiko.teammatestracker.model;
 
-import net.minecraft.client.render.Camera;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
