@@ -17,4 +17,7 @@ public class TeammatesConfig {
 
     @SerialEntry
     public boolean enabled = true;
+
+    @SerialEntry
+    public float markerScale = 1.f;
 }

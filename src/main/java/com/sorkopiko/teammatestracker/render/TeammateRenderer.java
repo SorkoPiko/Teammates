@@ -2,6 +2,7 @@ package com.sorkopiko.teammatestracker.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.sorkopiko.teammatestracker.client.TeammatesTrackerClient;
+import com.sorkopiko.teammatestracker.config.TeammatesConfig;
 import com.sorkopiko.teammatestracker.model.InterpolatedLocation;
 import com.sorkopiko.teammatestracker.model.Teammate;
 import net.minecraft.client.MinecraftClient;
@@ -28,7 +29,7 @@ public class TeammateRenderer {
     private static final float ARROW_OFFSET_Y = 2.15f;
 
     public static void render(MatrixStack matrices, Camera camera, Map<UUID, Teammate> teammates, double tickDelta) {
-        if (client.player == null || client.world == null) return;
+        if (client.player == null || client.world == null || !TeammatesConfig.HANDLER.instance().enabled) return;
 
         Vec3d cameraPos = camera.getPos();
         String currentWorld = client.world.getRegistryKey().getValue().getPath();
@@ -95,7 +96,7 @@ public class TeammateRenderer {
 
         EntityRenderDispatcher dispatcher = client.getEntityRenderDispatcher();
         matrices.multiply(dispatcher.getRotation());
-        float scale = (float) getScale(distance, 1.f);
+        float scale = (float) getScale(distance, TeammatesConfig.HANDLER.instance().markerScale);
         matrices.scale(scale, scale, scale);
         int backgroundColor = (int)(MinecraftClient.getInstance().options.getTextBackgroundOpacity(0.25F) * 255.0F) << 24 | 0x666666;
 

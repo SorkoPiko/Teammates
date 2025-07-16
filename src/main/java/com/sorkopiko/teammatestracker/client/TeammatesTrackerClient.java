@@ -9,6 +9,7 @@ import com.sorkopiko.teammatestracker.packet.ApolloPayload;
 import com.sorkopiko.teammatestracker.packet.UpdateTeamMembersPayload;
 import dev.kikugie.fletching_table.annotation.fabric.Entrypoint;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -60,6 +61,9 @@ public class TeammatesTrackerClient implements ClientModInitializer {
         });
 
         WorldRenderEvents.AFTER_TRANSLUCENT.register((context) -> TeammateRenderer.render(context.matrixStack(), context.camera(), teammates, context.tickCounter().getTickDelta(true)));
+
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> teammates.clear());
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> teammates.clear());
 
         TeammatesConfig.HANDLER.load();
     }
