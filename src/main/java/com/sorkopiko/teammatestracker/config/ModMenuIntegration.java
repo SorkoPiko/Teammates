@@ -5,10 +5,8 @@ import com.terraformersmc.modmenu.api.ModMenuApi;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.FloatSliderControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
-import dev.kikugie.fletching_table.annotation.fabric.Entrypoint;
 import net.minecraft.text.Text;
 
-@Entrypoint
 public class ModMenuIntegration implements ModMenuApi {
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
@@ -56,6 +54,15 @@ public class ModMenuIntegration implements ModMenuApi {
                                                 .range(0.0f, 2.0f)
                                                 .step(0.01f)
                                                 .formatValue(val -> Text.literal(String.format("%.2f", val))))
+                                        .build())
+                                .option(Option.<Boolean>createBuilder()
+                                        .name(Text.literal("Hide Arrow When Glowing"))
+                                        .description(OptionDescription.of(Text.literal("Hide the arrow indicator when a teammate has the glowing effect")))
+                                        .binding(
+                                                true,
+                                                () -> TeammatesConfig.HANDLER.instance().hideArrowWhenGlowing,
+                                                hide -> TeammatesConfig.HANDLER.instance().hideArrowWhenGlowing = hide)
+                                        .controller(TickBoxControllerBuilder::create)
                                         .build())
                                 .build())
                         .build())

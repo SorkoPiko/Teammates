@@ -23,4 +23,7 @@ public class TeammatesConfig {
 
     @SerialEntry
     public float yOffset = 0.5f;
+
+    @SerialEntry
+    public boolean hideArrowWhenGlowing = true;
 }

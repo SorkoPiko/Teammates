@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 //? if >= 1.21.2 {
 /*import net.minecraft.client.gl.ShaderProgramKeys;
-*///?}
+ *///?}
 
 public class TeammateRenderer {
     private static final MinecraftClient client = MinecraftClient.getInstance();
@@ -83,7 +83,7 @@ public class TeammateRenderer {
 
         //? if >= 1.21.2 {
         /*RenderSystem.setShaderFog(originalFog);
-        *///?} else {
+         *///?} else {
         RenderSystem.setShaderFogStart(originalFogStart);
         RenderSystem.setShaderFogEnd(originalFogEnd);
         //?}
@@ -104,9 +104,10 @@ public class TeammateRenderer {
         matrices.scale(scale, scale, scale);
         int backgroundColor = (int)(MinecraftClient.getInstance().options.getTextBackgroundOpacity(0.25F) * 255.0F) << 24 | 0x666666;
 
-        // Check if the player has glowing effect
+        // Check if the player has glowing effect and if the feature is enabled
         PlayerEntity player = getLoadedPlayer(teammate.getPlayerId());
         boolean hasGlowing = player != null && player.hasStatusEffect(StatusEffects.GLOWING);
+        boolean shouldHideArrow = TeammatesConfig.HANDLER.instance().hideArrowWhenGlowing && hasGlowing;
 
         Text displayName = teammate.getDisplayName();
         if (displayName != null) {
@@ -114,12 +115,12 @@ public class TeammateRenderer {
         }
 
         String distanceText = String.format("%.1fm", distance);
-        
-        // Only render arrow if player doesn't have glowing effect
-        if (!hasGlowing) {
+
+        // Only render arrow if config allows it or player doesn't have glowing effect
+        if (!shouldHideArrow) {
             renderArrow(matrices, teammate.getMarkerColor());
         }
-        
+
         renderText(matrices, Text.literal(distanceText), 0, -TEXT_OFFSET, 0xFFFFFF, backgroundColor, true, distance);
 
         matrices.pop();
@@ -144,9 +145,9 @@ public class TeammateRenderer {
 
         //? if >= 1.21.2 {
         /*RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
-        *///?} else {
+         *///?} else {
         RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-         //?}
+        //?}
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         BufferRenderer.drawWithGlobalProgram(buffer.end());
