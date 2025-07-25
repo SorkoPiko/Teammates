@@ -9,6 +9,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
@@ -103,13 +104,22 @@ public class TeammateRenderer {
         matrices.scale(scale, scale, scale);
         int backgroundColor = (int)(MinecraftClient.getInstance().options.getTextBackgroundOpacity(0.25F) * 255.0F) << 24 | 0x666666;
 
+        // Check if the player has glowing effect
+        PlayerEntity player = getLoadedPlayer(teammate.getPlayerId());
+        boolean hasGlowing = player != null && player.hasStatusEffect(StatusEffects.GLOWING);
+
         Text displayName = teammate.getDisplayName();
         if (displayName != null) {
             renderText(matrices, displayName, 0, -TEXT_OFFSET-10, 0xFFFFFF, backgroundColor, true, distance);
         }
 
         String distanceText = String.format("%.1fm", distance);
-        renderArrow(matrices, teammate.getMarkerColor());
+        
+        // Only render arrow if player doesn't have glowing effect
+        if (!hasGlowing) {
+            renderArrow(matrices, teammate.getMarkerColor());
+        }
+        
         renderText(matrices, Text.literal(distanceText), 0, -TEXT_OFFSET, 0xFFFFFF, backgroundColor, true, distance);
 
         matrices.pop();
