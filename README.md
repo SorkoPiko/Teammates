@@ -1,0 +1,1 @@
+for my fellow hoplite players, this allows you to remove the indicator when the player has the glowing effect. it adds an option in mod menu, disable it if you want. the owner of the mod doesn't want to add this option for whatever reason.
