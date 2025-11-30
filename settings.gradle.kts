@@ -3,7 +3,6 @@ pluginManagement {
         maven("https://maven.fabricmc.net/") { name = "Fabric" }
         maven("https://maven.kikugie.dev/snapshots") { name = "KikuGie Snapshots" }
         gradlePluginPortal()
-        maven("https://maven.kikugie.dev/snapshots") { name = "KikuGie Snapshots" }
     }
 }
 
@@ -13,6 +12,6 @@ plugins {
 
 stonecutter {
     create(rootProject) {
-        versions("1.21", "1.21.2")
+        versions("1.21", "1.21.2", "1.21.4", "1.21.5", "1.21.6", "1.21.9")
     }
 }

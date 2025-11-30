@@ -7,7 +7,6 @@ import com.sorkopiko.teammatestracker.model.Teammate;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.*;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
@@ -16,8 +15,30 @@ import org.joml.Matrix4f;
 import java.awt.*;
 import java.util.Map;
 import java.util.UUID;
-//? if >= 1.21.2 {
+//? if >= 1.21.5 {
+import com.mojang.blaze3d.platform.DestFactor;
+import com.mojang.blaze3d.platform.SourceFactor;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.DepthTestFunction;
+import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.util.Identifier;
+//? if >= 1.21.6 {
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.buffers.Std140SizeCalculator;
+import com.mojang.blaze3d.buffers.Std140Builder;
+import net.minecraft.client.gl.MappableRingBuffer;
+//?}
+//?} else if >= 1.21.2 {
 /*import net.minecraft.client.gl.ShaderProgramKeys;
+*///?}
+
+//? if >= 1.21.9 {
+import net.minecraft.client.render.entity.EntityRenderManager;
+//?} else {
+/*import net.minecraft.client.render.entity.EntityRenderDispatcher;
 *///?}
 
 public class TeammateRenderer {
@@ -26,17 +47,71 @@ public class TeammateRenderer {
     private static final int TEXT_OFFSET = 20;
     private static final float ARROW_OFFSET_Y = 2.f;
 
+    //? if >= 1.21.5 {
+    private static final RenderPipeline POSITION_COLOR_TRIANGLE = RenderPipelines.register(
+            RenderPipeline.builder(RenderPipelines.POSITION_COLOR_SNIPPET)
+                    .withLocation(Identifier.of("teammates_tracker", "pipeline/position_color_triangle"))
+                    .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLES)
+                    .withBlend(new BlendFunction(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ZERO))
+                    .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+                    .withCull(false)
+                    .build()
+    );
+
+    private static final RenderLayer ARROW_RENDER_LAYER = RenderLayer.of(
+            "teammates_tracker_arrow",
+            RenderLayer.DEFAULT_BUFFER_SIZE,
+            false,
+            true,
+            POSITION_COLOR_TRIANGLE,
+            RenderLayer.MultiPhaseParameters.builder().build(false)
+    );
+    //?}
+
+    //? if >= 1.21.6 {
+    private static final MappableRingBuffer fogBuffer = new MappableRingBuffer(
+            () -> "Custom Fog Buffer",
+            GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
+            new Std140SizeCalculator()
+                    .putFloat()  // start
+                    .putFloat()  // end
+                    .putInt()    // shape enum
+                    .putVec4()   // color (r, g, b, a)
+                    .get()
+    );
+    //?}
+
     public static void render(MatrixStack matrices, Camera camera, Map<UUID, Teammate> teammates, double tickDelta) {
         if (client.player == null || client.world == null || !TeammatesConfig.HANDLER.instance().enabled) return;
 
         Vec3d cameraPos = camera.getPos();
         String currentWorld = client.world.getRegistryKey().getValue().getPath();
 
-        RenderSystem.enableBlend();
+        //? if <= 1.21.4 {
+        /*RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
-        //? if >= 1.21.2 {
+        RenderSystem.disableCull();
+        *///?}
+
+        //? if >= 1.21.6 {
+        GpuBufferSlice originalFog = RenderSystem.getShaderFog();
+
+        fogBuffer.rotate();
+
+        try (GpuBuffer.MappedView view = RenderSystem.getDevice()
+                .createCommandEncoder()
+                .mapBuffer(fogBuffer.getBlocking(), false, true)) {
+            Std140Builder.intoBuffer(view.data())
+                    .putFloat(Float.MAX_VALUE)
+                    .putFloat(Float.MAX_VALUE)
+                    .putInt(0)
+                    .putVec4(0.f, 0.f, 0.f, 0.f);
+        }
+
+        RenderSystem.setShaderFog(fogBuffer.getBlocking().slice());
+        //?} else if >= 1.21.2 {
         /*Fog originalFog = RenderSystem.getShaderFog();
         RenderSystem.setShaderFog(new Fog(
                 Float.MAX_VALUE,
@@ -48,11 +123,11 @@ public class TeammateRenderer {
                 0.f
         ));
         *///?} else {
-        float originalFogStart = RenderSystem.getShaderFogStart();
+        /*float originalFogStart = RenderSystem.getShaderFogStart();
         float originalFogEnd = RenderSystem.getShaderFogEnd();
         RenderSystem.setShaderFogStart(Float.MAX_VALUE);
         RenderSystem.setShaderFogEnd(Float.MAX_VALUE);
-        //?}
+        *///?}
 
         long currentTime = System.currentTimeMillis();
 
@@ -81,14 +156,18 @@ public class TeammateRenderer {
         matrices.pop();
 
         //? if >= 1.21.2 {
-        /*RenderSystem.setShaderFog(originalFog);
-        *///?} else {
-        RenderSystem.setShaderFogStart(originalFogStart);
+        RenderSystem.setShaderFog(originalFog);
+        //?} else {
+        /*RenderSystem.setShaderFogStart(originalFogStart);
         RenderSystem.setShaderFogEnd(originalFogEnd);
-        //?}
+        *///?}
+
+        //? if <= 1.21.4 {
+        /*RenderSystem.enableCull();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
+        *///?}
     }
 
     private static void renderTeammateMarker(MatrixStack matrices, InterpolatedLocation location, Teammate teammate, double distance) {
@@ -97,8 +176,13 @@ public class TeammateRenderer {
         matrices.push();
         matrices.translate(location.x(), location.y(), location.z());
 
-        EntityRenderDispatcher dispatcher = client.getEntityRenderDispatcher();
+        //? if >= 1.21.9 {
+        EntityRenderManager dispatcher = client.getEntityRenderDispatcher();
+        matrices.multiply(dispatcher.camera.getRotation());
+        //?} else {
+        /*EntityRenderDispatcher dispatcher = client.getEntityRenderDispatcher();
         matrices.multiply(dispatcher.getRotation());
+        *///?}
         float scale = (float) getScale(distance, TeammatesConfig.HANDLER.instance().markerScale);
         matrices.scale(scale, scale, scale);
         int backgroundColor = (int)(MinecraftClient.getInstance().options.getTextBackgroundOpacity(0.25F) * 255.0F) << 24 | 0x666666;
@@ -132,14 +216,17 @@ public class TeammateRenderer {
         buffer.vertex(matrix, 0, -halfSize, 0).color(r, g, b, a);
         buffer.vertex(matrix, halfSize, halfSize, 0).color(r, g, b, a);
 
-        //? if >= 1.21.2 {
+        //? if >= 1.21.5 {
+        ARROW_RENDER_LAYER.draw(buffer.end());
+        //?} else if >= 1.21.2 {
         /*RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
-        *///?} else {
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-         //?}
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-
         BufferRenderer.drawWithGlobalProgram(buffer.end());
+        *///?} else {
+        /*RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        BufferRenderer.drawWithGlobalProgram(buffer.end());
+        *///?}
     }
 
     private static void renderText(MatrixStack matrices, Text text, float x, float y, int color, int backgroundColor, boolean centered, double distance) {

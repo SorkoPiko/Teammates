@@ -1,6 +1,10 @@
 package com.sorkopiko.teammatestracker.client;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import com.google.protobuf.*;
+import com.mojang.serialization.JsonOps;
 import com.sorkopiko.teammatestracker.render.TeammateRenderer;
 import lunarclient.apollo.team.v1.Schema.*;
 import com.sorkopiko.teammatestracker.config.TeammatesConfig;
@@ -11,14 +15,17 @@ import dev.kikugie.fletching_table.annotation.fabric.Entrypoint;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.text.Text;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.TextCodecs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+//? if < 1.21.9 {
+/*import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+*///?}
 
 import java.util.Map;
 import java.util.Optional;
@@ -31,7 +38,7 @@ import java.util.stream.Collectors;
 public class TeammatesTrackerClient implements ClientModInitializer {
     public static final String MOD_ID = "teammates-tracker";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    private final Map<UUID, Teammate> teammates = new ConcurrentHashMap<>();
+    private static final Map<UUID, Teammate> teammates = new ConcurrentHashMap<>();
 
     @Override
     public void onInitializeClient() {
@@ -60,7 +67,18 @@ public class TeammatesTrackerClient implements ClientModInitializer {
             }
         });
 
-        WorldRenderEvents.AFTER_TRANSLUCENT.register((context) -> TeammateRenderer.render(context.matrixStack(), context.camera(), teammates, context.tickCounter().getTickDelta(true)));
+        //? if < 1.21.9 {
+        /*WorldRenderEvents.AFTER_TRANSLUCENT.register((context) -> TeammateRenderer.render(
+                context.matrixStack(),
+                context.camera(),
+                teammates,
+                //? if >= 1.21.5 {
+                context.tickCounter().getTickProgress(true)
+                //?} else {
+                /^context.tickCounter().getTickDelta(true)
+                 ^///?}
+        ));
+        *///?}
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> teammates.clear());
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> teammates.clear());
@@ -88,7 +106,7 @@ public class TeammatesTrackerClient implements ClientModInitializer {
                     teammember.y(),
                     teammember.z(),
                     teammember.worldName(),
-                    Text.Serialization.fromJson(teammember.displayName(), registries),
+                    fromJson(teammember.displayName(), registries),
                     teammember.markerColor(),
                     currentTime
             );
@@ -105,5 +123,14 @@ public class TeammatesTrackerClient implements ClientModInitializer {
             LOGGER.error("Failed to check message type for {}: {}", clazz.getSimpleName(), e.getMessage());
             return Optional.empty();
         }
+    }
+
+    public static MutableText fromJson(String json, RegistryWrapper.WrapperLookup registries) {
+        JsonElement jsonElement = JsonParser.parseString(json);
+        return jsonElement == null ? null : (MutableText) TextCodecs.CODEC.parse(registries.getOps(JsonOps.INSTANCE), jsonElement).getOrThrow(JsonParseException::new);
+    }
+
+    public static Map<UUID, Teammate> getTeammates() {
+        return teammates;
     }
 }

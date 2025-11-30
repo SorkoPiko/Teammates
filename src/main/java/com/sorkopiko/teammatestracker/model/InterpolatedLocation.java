@@ -15,9 +15,15 @@ public record InterpolatedLocation(double x, double y, double z) {
 
     public static InterpolatedLocation fromPlayer(PlayerEntity player, double tickDelta) {
         return new InterpolatedLocation(
-                MathHelper.lerp(tickDelta, player.prevX, player.getX()),
+                //? if >= 1.21.5 {
+                MathHelper.lerp(tickDelta, player.lastX, player.getX()),
+                MathHelper.lerp(tickDelta, player.lastY, player.getY()),
+                MathHelper.lerp(tickDelta, player.lastZ, player.getZ())
+                //?} else {
+                /*MathHelper.lerp(tickDelta, player.prevX, player.getX()),
                 MathHelper.lerp(tickDelta, player.prevY, player.getY()),
                 MathHelper.lerp(tickDelta, player.prevZ, player.getZ())
+                *///?}
         );
     }
 
