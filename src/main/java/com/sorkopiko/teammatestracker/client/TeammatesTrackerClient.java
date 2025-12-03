@@ -25,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //? if < 1.21.9 {
 /*import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+*///?} else if !1.21.9 {
+/*import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 *///?}
 
 import java.util.Map;
@@ -67,7 +69,7 @@ public class TeammatesTrackerClient implements ClientModInitializer {
             }
         });
 
-        //? if < 1.21.9 {
+        //? if !1.21.9 {
         /*WorldRenderEvents.AFTER_TRANSLUCENT.register((context) -> TeammateRenderer.render(
                 context.matrixStack(),
                 context.camera(),
@@ -76,7 +78,7 @@ public class TeammatesTrackerClient implements ClientModInitializer {
                 context.tickCounter().getTickProgress(true)
                 //?} else {
                 /^context.tickCounter().getTickDelta(true)
-                 ^///?}
+                ^///?}
         ));
         *///?}
 

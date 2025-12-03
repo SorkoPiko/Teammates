@@ -1,4 +1,4 @@
-//? if >= 1.21.9 {
+//? if 1.21.9 {
 package com.sorkopiko.teammatestracker.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
@@ -47,7 +47,6 @@ public class WorldRendererMixin {
         framePass.setRenderer(() -> {
             RenderSystem.setShaderFog(fogBuffer);
             MatrixStack matrices = new MatrixStack();
-            matrices.multiplyPositionMatrix(positionMatrix);
             TeammateRenderer.render(
                     matrices,
                     camera,

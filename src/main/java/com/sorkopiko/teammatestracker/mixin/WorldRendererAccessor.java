@@ -1,4 +1,4 @@
-//? if >= 1.21.9 {
+//? if 1.21.9 {
 package com.sorkopiko.teammatestracker.mixin;
 
 import net.minecraft.client.render.DefaultFramebufferSet;
